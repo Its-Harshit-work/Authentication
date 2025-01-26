@@ -83,8 +83,6 @@ const verifyOTP = async (req, res) => {
 
     const defaultDataset = new Dataset({
       name: "Default Dataset",
-      type: "user", // Or whatever default type you'd like
-      license: "basic", // Or another default license type
       userId: user._id, // Link dataset to the user
     });
 
