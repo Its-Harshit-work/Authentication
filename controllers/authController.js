@@ -146,8 +146,11 @@ const submitEnterpriseForm = async (req, res) => {
     user.descriptionForm = descriptionForm;
     await user.save();
 
+    const userEmail = req.user.email;
+
     await appendToExcel("enterprise_responses.xlsx", [
       {
+        UserEmail: userEmail,
         Date: new Date().toISOString(),
         FirstName: firstName,
         LastName: lastName,
