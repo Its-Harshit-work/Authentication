@@ -7,6 +7,9 @@ const userSchema = new mongoose.Schema({
   otp: { type: String, default: null },
   otpExpiresAt: { type: Date, default: null },
   isVerified: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now }, // Timestamp for account creation
+  credits: { type: Number, default: 300 }, // Default credits for new users, will change it based on formulae in future
+  dataset_id: { type: mongoose.Schema.Types.ObjectId, ref: "Dataset" }, // Link to dataset
   role: { type: String, enum: ["user", "enterprise"], required: true },
   firstName: { type: String },
   lastName: { type: String },

@@ -4,6 +4,8 @@ const { appendToExcel } = require("../utils/excelService");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const Dataset = require("../models/dataset"); 
+
 
 const register = async (req, res) => {
   try {
@@ -34,14 +36,14 @@ const register = async (req, res) => {
     });
     await newUser.save();
 
-    console.log(`User registered: ${newUser}`);
+    // console.log(`User registered: ${newUser}`);
 
     // Log before sending OTP
-    console.log(`Sending OTP to ${email}`);
+    // console.log(`Sending OTP to ${email}`);
     await sendEmail(
       email,
       "OTP for Registration",
-      `Hello ${username},\n\nYour OTP for registration is: ${otp}\n\nThank you!`
+      `Hello ${username},\n\n Welcome to Akai Space.\n We are excited to have you \n Your OTP for registration is: ${otp}\n\nThank you!`
     );
 
     res.status(201).json({ message: "User registered successfully. Check your email for OTP." });
@@ -78,9 +80,21 @@ const verifyOTP = async (req, res) => {
     user.isVerified = true;
     user.otp = null; // Clear the OTP after verification
     user.otpExpiresAt = null; // Clear the expiration time
+
+    const defaultDataset = new Dataset({
+      name: "Default Dataset",
+      type: "user", // Or whatever default type you'd like
+      license: "basic", // Or another default license type
+      userId: user._id, // Link dataset to the user
+    });
+
+    await defaultDataset.save();
     await user.save();
 
-    res.status(200).json({ message: "OTP verified successfully." });
+
+    await user.save();
+
+    res.status(200).json({ message: "OTP verified successfully, and dataset created." });
   } catch (error) {
     console.error("Error occurred while verifying OTP:", error);
     res.status(500).json({ message: "Error occurred while verifying OTP.", error });
