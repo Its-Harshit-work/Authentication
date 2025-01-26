@@ -6,6 +6,7 @@ const taskSchema = new mongoose.Schema({
   size: { type: Number, required: true }, // Total size of all files in bytes
   startOn: { type: Date, required: true },
   creditsNeeded: { type: Number, required: true },
-});
+},{ timestamps: true });
+
 
 module.exports = mongoose.model("Task", taskSchema);

@@ -4,7 +4,7 @@ const { appendToExcel } = require("../utils/excelService");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const Dataset = require("../models/dataset"); 
+// const Dataset = require("../models/dataset"); 
 
 
 const register = async (req, res) => {
@@ -81,18 +81,13 @@ const verifyOTP = async (req, res) => {
     user.otp = null; // Clear the OTP after verification
     user.otpExpiresAt = null; // Clear the expiration time
 
-    const defaultDataset = new Dataset({
-      name: "Default Dataset",
-      userId: user._id, // Link dataset to the user
-    });
-
-    await defaultDataset.save();
+    
     await user.save();
 
 
     await user.save();
 
-    res.status(200).json({ message: "OTP verified successfully, and dataset created." });
+    res.status(200).json({ message: "OTP verified successfully" });
   } catch (error) {
     console.error("Error occurred while verifying OTP:", error);
     res.status(500).json({ message: "Error occurred while verifying OTP.", error });
