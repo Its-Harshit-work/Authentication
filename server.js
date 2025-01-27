@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const authRoutes = require("./routes/auth");
+const dataPointRoutes = require("./routes/datapoint");
 
 dotenv.config();
 const app = express();
@@ -17,6 +18,7 @@ mongoose.connect(process.env.MONGO_URI)
 // Routes
 app.use("/api/dataset", datasetRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/datapoint", dataPointRoutes);
 
 // Start the Server
 const PORT = process.env.PORT || 5000;
