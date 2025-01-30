@@ -1,6 +1,21 @@
 const User = require("../models/user");
 const Dataset = require("../models/dataset");
 const Task = require("../models/task");
+const { S3Client } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+
+
+const AWS = require('aws-sdk');
+
+// Configure AWS S3
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  }
+});
+
 
 const createDataset = async (req, res) => {
   try {
@@ -68,4 +83,46 @@ const addTaskToDataset = async (req, res) => {
   }
 };
 
-module.exports = { createDataset, addTaskToDataset, getDatasetsForUser };
+// module.exports = { createDataset, addTaskToDataset, getDatasetsForUser };
+
+
+// Generate Pre-signed URL
+const generatePresignedUrls = async (req, res) => {
+  try {
+    const { datasetId, taskId, fileNames } = req.body;
+
+    if (!Array.isArray(fileNames) || fileNames.length === 0) {
+      return res.status(400).json({ message: "fileNames should be a non-empty array." });
+    }
+
+    const dataset = await Dataset.findById(datasetId);
+    if (!dataset) return res.status(404).json({ message: "Dataset not found." });
+
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ message: "Task not found." });
+
+    const urls = await Promise.all(fileNames.map(async (fileName) => {
+      const command = new PutObjectCommand({
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: `uploads/${datasetId}/${taskId}/${fileName}`,
+        ContentType: "image/jpeg" // Change based on file type
+      });
+
+      const url = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1 hour expiry
+
+      return { fileName, url };
+    }));
+
+    res.status(200).json({ urls });
+  } catch (error) {
+    console.error("Error generating presigned URLs:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+module.exports = { 
+  createDataset, 
+  addTaskToDataset, 
+  getDatasetsForUser, 
+  generatePresignedUrls 
+};

@@ -33,6 +33,35 @@ const createDataPoint = async (req, res) => {
   }
 };
 
+const saveUploadedFiles = async (req, res) => {
+  try {
+    const { datasetId, taskId, files } = req.body; // Array of { fileName, fileUrl }
+
+    if (!Array.isArray(files) || files.length === 0) {
+      return res.status(400).json({ message: "Files should be a non-empty array." });
+    }
+
+    const newDataPoints = files.map(file => ({
+      video_image_url: file.fileUrl,
+      dataset_id: datasetId,
+      task_id: taskId,
+      labels: [],
+      reference_label: "",
+      game_mapping: "default",
+      final_label: ""
+    }));
+
+    await DataPoint.insertMany(newDataPoints);
+
+    res.status(201).json({ message: "Files saved successfully", newDataPoints });
+  } catch (error) {
+    console.error("Error saving file metadata:", error);
+    res.status(500).json({ message: "Failed to save files", error });
+  }
+};
+
+module.exports = { saveUploadedFiles };
+
 const getDataPoints = async (req, res) => {
   try {
     const dataPoints = await DataPoint.find().populate("dataset_id").populate("task_id");
